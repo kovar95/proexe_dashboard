@@ -1,5 +1,8 @@
 # Users Dashboard project
 
+`notes`
+Because it's test API, error handling is little weird, cause API doesn't allow editing and deleting users that are not extuali on API
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
