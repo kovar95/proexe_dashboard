@@ -3,7 +3,7 @@ import * as actionTypes from './ActionTypes';
 
 export type UserAction = {type: string, payload: User | User[] | number};
 export type ErrorAction = {type: string, payload: string | null};
-export type LoadingAction = {type: string, payload: boolean};
+export type StatesAction = {type: string, payload: boolean | number};
 
 
 export const editUser = (user: User): UserAction => ({
@@ -31,17 +31,17 @@ export const updateErrors = (error: string | null): ErrorAction => ({
     payload:error, 
 });
 
-export const updateLoadingState = (loadingState: boolean): LoadingAction => ({
+export const updateLoadingState = (loadingState: boolean): StatesAction => ({
     type: actionTypes.UPDATE_LOADING,
     payload: loadingState, 
 });
 
-export const updateApiDataLoaded = (apiDataLoaded: boolean): LoadingAction => ({
+export const updateApiDataLoaded = (apiDataLoaded: boolean): StatesAction => ({
     type: actionTypes.UPDATE_API_LOADED,
     payload: apiDataLoaded, 
 });
 
-export const sortUsers = (sortIndex: number): UserAction => ({
+export const updateSortingIndex = (sortIndex: number): StatesAction => ({
     type: actionTypes.SORT_USERS,
     payload: sortIndex, 
 });

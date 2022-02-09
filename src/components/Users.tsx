@@ -11,6 +11,7 @@ import {
 } from '../store/ActionCreators';
 import ProexeDataService from '../services/proexe/service';
 import { IRootState } from '../store/reducers';
+import { User } from '../services/proexe/types';
 import DeleteModal from './DeleteModal';
 
 const ERROR_MESSAGE = 'Unable to load data from API!';
@@ -19,11 +20,12 @@ const Users = () => {
   const {
     usersReducer: { users },
     errorReducer: { error },
-    loadingReducer: { loading, apiDataLoaded },
+    statesReducer: { loading, apiDataLoaded, sortingIndex },
   } = useSelector<IRootState, IRootState>((state) => state);
 
   const dispatch = useDispatch();
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
+  const [sortedUsers, setSortedUsers] = useState<User[] | null>(null);
 
   const fullfillStore = useCallback(async () => {
     const alertError = (error: string, timeout: number = 5000) => {
@@ -49,7 +51,17 @@ const Users = () => {
     if (!apiDataLoaded) {
       fullfillStore();
     }
-  }, [fullfillStore, apiDataLoaded]);
+    if (sortingIndex) {
+      const rawUsers = [...users].sort((user1, user2) =>
+        user1.username.toLowerCase() > user2.username.toLowerCase()
+          ? -sortingIndex
+          : sortingIndex
+      );
+      setSortedUsers(rawUsers);
+    } else {
+      setSortedUsers(users);
+    }
+  }, [fullfillStore, apiDataLoaded, users, sortingIndex]);
 
   return (
     <>
@@ -59,7 +71,7 @@ const Users = () => {
         <>
           <DeleteModal setDeleteUserId={setDeleteUserId} id={deleteUserId} />
           {error && <Alert color="danger">{error}</Alert>}
-          {!users.length ? (
+          {!sortedUsers?.length ? (
             <Alert color="warning">Users table is empty!</Alert>
           ) : (
             <Table bordered hover>
@@ -75,7 +87,7 @@ const Users = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => {
+                {sortedUsers.map((user) => {
                   const { id, name, username, email, city } = user;
                   return (
                     <tr key={id}>

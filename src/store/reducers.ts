@@ -2,12 +2,12 @@ import { combineReducers, createStore } from 'redux';
 import { composeWithDevTools } from "redux-devtools-extension";
 import { errorReducer } from './errorReducer';
 import { usersReducer } from './usersReducer';
-import { loadingReducer } from './loadingReducer';
+import { statesReducer } from './statesReducer';
 
 const rootReducer =  combineReducers({
     errorReducer,
     usersReducer,
-    loadingReducer,
+    statesReducer,
 })
 
 const store = createStore(rootReducer, composeWithDevTools());

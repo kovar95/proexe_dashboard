@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { sortUsers } from '../store/ActionCreators';
+import { updateSortingIndex } from '../store/ActionCreators';
 import {
   ButtonDropdown,
   DropdownToggle,
@@ -14,7 +14,7 @@ const SortFilter = () => {
   const dispatch = useDispatch();
 
   const onSortUsers = (sortIndex: number) => {
-    dispatch(sortUsers(sortIndex));
+    dispatch(updateSortingIndex(sortIndex));
   };
 
   return (

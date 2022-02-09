@@ -23,11 +23,6 @@ export const usersReducer = (state: Users = initialState, action: UserAction) =>
             const filteredUsers = state.users.filter(user => user.id !== action.payload)
             return {...state, users: filteredUsers}
         }
-        case actionTypes.SORT_USERS: {
-            const rawUsers = [...state.users];
-            const sortIndex = action.payload as number;
-            return {...state, users: rawUsers.sort((user1, user2) => user1.username > user2.username ? -sortIndex : sortIndex)}
-        }
         case actionTypes.ADD_USERS: {
             return {...state, users: action.payload as User[]}
         }
