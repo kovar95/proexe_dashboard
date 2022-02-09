@@ -1,12 +1,19 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { deleteUser, updateLoadingState } from '../store/ActionCreators';
+import {
+  deleteUser,
+  updateLoadingState,
+  updateErrors,
+} from '../store/ActionCreators';
+import ProexeDataService from '../services/proexe/service';
 
 type Props = {
   id: number | null;
   setDeleteUserId: (userId: number | null) => void;
 };
+
+const DELETE_USER_ERROR = 'Unable to delete this user!';
 
 const DeleteModal: React.FC<Props> = ({ id, setDeleteUserId }) => {
   const resetModal = () => {
@@ -15,10 +22,25 @@ const DeleteModal: React.FC<Props> = ({ id, setDeleteUserId }) => {
 
   const dispatch = useDispatch();
 
-  const onDelete = () => {
+  const onDelete = async () => {
     if (id) {
       dispatch(updateLoadingState(true));
       dispatch(deleteUser(id));
+      resetModal();
+      dispatch(updateLoadingState(false));
+      try {
+        const req = await ProexeDataService.delete(id);
+        if (req) {
+          dispatch(deleteUser(id));
+        } else {
+          updateErrors(DELETE_USER_ERROR);
+        }
+      } catch (error: any) {
+        if (!error.message.includes('404')) {
+          dispatch(updateErrors(error?.message ?? DELETE_USER_ERROR));
+          setTimeout(() => dispatch(updateErrors(null)), 5000);
+        }
+      }
       resetModal();
       dispatch(updateLoadingState(false));
     }

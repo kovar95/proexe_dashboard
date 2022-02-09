@@ -13,7 +13,13 @@ import {
 } from 'reactstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { addUser, editUser, updateLoadingState } from '../store/ActionCreators';
+import ProexeDataService from '../services/proexe/service';
+import {
+  addUser,
+  editUser,
+  updateLoadingState,
+  updateErrors,
+} from '../store/ActionCreators';
 import { IRootState } from '../store/reducers';
 import { User } from '../services/proexe/types';
 
@@ -33,11 +39,19 @@ type FormUser = {
   email: string;
 };
 
+const UPDATE_USER_ERROR = 'Unable to update user info!';
+const CREATE_USER_ERROR = 'Unable to create new user!';
+
 const FormikForm = () => {
   const dispatch = useDispatch();
   const users = useSelector<IRootState, User[]>(
     (state) => state.usersReducer.users
   );
+
+  const submitError = (message: string, timeout: number = 5000) => {
+    dispatch(updateErrors(message));
+    setTimeout(() => dispatch(updateErrors(null)), timeout);
+  };
 
   const generateRandomCity = () => {
     const randNumber = Math.floor(Math.random() * users.length);
@@ -50,30 +64,52 @@ const FormikForm = () => {
     const ids = users.map((user) => user.id).sort((id1, id2) => id1 - id2);
 
     // Return id larger for 1 from highest
-    return ids?.length ? ids[ids.length - 1] + 1 : 1;
+    if (!ids?.length) {
+      return 11;
+    }
+    return ids[ids.length - 1] < 11 ? 11 : ids[ids.length - 1] + 1;
   };
 
-  const onAddUser = (user: FormUser) => {
+  const onAddUser = async (user: FormUser) => {
     const { email } = user;
-    dispatch(
-      addUser({
-        ...user,
-        id: findNextId(),
-        city: generateRandomCity(),
-        username: email.substring(0, email.indexOf('@')),
-      })
-    );
+    const userForSubmit = {
+      ...user,
+      id: findNextId(),
+      city: generateRandomCity(),
+      username: email.substring(0, email.indexOf('@')),
+    };
+    try {
+      const req = await ProexeDataService.create(userForSubmit);
+      dispatch(addUser(req));
+    } catch (error: any) {
+      submitError(error?.message ?? CREATE_USER_ERROR);
+    }
   };
 
-  const onEditUser = (user: FormUser) => {
+  const onEditUser = async (user: FormUser) => {
     const { name, email } = user;
-    dispatch(
-      editUser({
-        ...initialValues!,
-        name,
-        email,
-      })
-    );
+    const updatedUser = {
+      ...initialValues!,
+      name,
+      email,
+    };
+    try {
+      const req = await ProexeDataService.update(
+        updatedUser,
+        initialValues!.id
+      );
+      if (req.status === 200) {
+        dispatch(editUser(req.data));
+      }
+      if (req.status === 404) {
+        dispatch(editUser(updatedUser));
+      }
+    } catch (error: any) {
+      if (!error.message.includes('404')) {
+        submitError(error?.message ?? UPDATE_USER_ERROR);
+      }
+      dispatch(editUser(updatedUser));
+    }
   };
 
   const onSubmitForm = (user: FormUser) => {
